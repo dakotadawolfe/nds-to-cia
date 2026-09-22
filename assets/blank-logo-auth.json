@@ -1,0 +1,6 @@
+{
+  "body_sha256": "998f536295183f5499238971d26f377a2cdcc5002d11fa207e786d82af5da03b",
+  "hmac_sha256": "fa15488deb5d7860756b0b7f727bb27c82184adb07c28d0ad1947c203cb6a314",
+  "source": "Project_CTR e8f5f529c54ff9b22a2491a480ffa69206bf7b19 Homebrew_LZ with all four texture payloads blanked",
+  "description": "Precomputed authentication tag for this exact static artwork. No HOME Menu key or console identity is included."
+}

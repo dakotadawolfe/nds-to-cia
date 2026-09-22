@@ -1,0 +1,6 @@
+{
+  "yanbf": {"repo": "YANBForwarder/YANBF", "commit": "bcd13c73469fab5777b60b94bd46ece5dba6ce7a"},
+  "forwarder": {"repo": "RocketRobz/NTR_Forwarder", "commit": "9009e9dd225182020699ad029b5522811004c322"},
+  "bootstrap": {"repo": "DS-Homebrew/nds-bootstrap", "commit": "8630be2bb5a861ea1eef2819a9ac9014927367b3"},
+  "makerom": {"repo": "3DSGuy/Project_CTR", "commit": "e8f5f529c54ff9b22a2491a480ffa69206bf7b19"}
+}
