@@ -56,6 +56,7 @@ def build():
     shutil.copy2(ROOT/'LICENSE.txt',release/'LICENSE.txt')
     shutil.copytree(bundle/'licenses',release/'licenses',dirs_exist_ok=True)
     shutil.copy2(ROOT/'docs/THIRD_PARTY.md',release/'THIRD_PARTY.md')
+    shutil.copytree(ROOT/'docs',release/'docs',dirs_exist_ok=True)
     (release/'build-info.json').write_text(json.dumps({'version':'1.0.0','source_commit':manifest['source_commit'],
         'runtime_sources':manifest['sources'],'python':sys.version.split()[0],
         'python_packages':{name:importlib.metadata.version(name) for name in ('pyinstaller','pyctr','pycryptodomex')}},indent=2)+'\n')
