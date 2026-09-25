@@ -20,6 +20,15 @@ class RomFS:
 
 
 class PreparationTests(unittest.TestCase):
+    @unittest.skipUnless((Path(__file__).parents[1] / 'dist-v2/runtime/nds-bootstrap-release.nds').is_file(),
+                         'Runtime integration check runs after the ARM build')
+    def test_built_runtime_screenshot_template(self):
+        binary = Path(__file__).parents[1] / 'dist-v2/runtime/nds-bootstrap-release.nds'
+        archive = prep.screenshot_archive(binary.read_bytes())
+        self.assertEqual(len(archive), 0x4BCC00)
+        self.assertTrue(any(archive[:512]))
+        self.assertEqual(archive[512:1024], bytes(512))
+
     def test_bad_crc_does_not_publish_or_leave_temporary(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory) / 'game'

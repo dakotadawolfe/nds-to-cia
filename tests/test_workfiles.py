@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+import os
 
 ROOT = Path(__file__).parents[1]
 
@@ -20,7 +21,7 @@ class WorkfileTests(unittest.TestCase):
             path = re.search(r'#define '+macro+r' "([^"]+)"', header)[1]
             self.assertEqual('/'+path, prepare.opaque_suffix(original))
 
-    @unittest.skipUnless(shutil.which('gcc'), 'C allocation tests run in the Linux build')
+    @unittest.skipUnless(os.name != 'nt' and shutil.which('gcc'), 'POSIX allocation tests run in the Linux build')
     def test_allocation_preservation_and_write_failure(self):
         with tempfile.TemporaryDirectory() as directory:
             work = Path(directory)

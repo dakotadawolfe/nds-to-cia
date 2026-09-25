@@ -3,12 +3,13 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+import os
 
 ROOT = Path(__file__).parents[1]
 
 
 class RuntimeTests(unittest.TestCase):
-    @unittest.skipUnless(shutil.which('g++'), 'C++ runtime tests run in the Linux build')
+    @unittest.skipUnless(os.name != 'nt' and shutil.which('g++'), 'C++ sanitizer tests run in the Linux build')
     def test_real_resolver_and_request_scan(self):
         with tempfile.TemporaryDirectory() as directory:
             work = Path(directory)

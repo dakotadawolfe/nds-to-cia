@@ -16,7 +16,10 @@ import zlib
 HEADER = struct.Struct('<8s64sI')
 ENTRY = struct.Struct('<128sQII')
 BLOCK = 1024 * 1024
-BOOTSTRAP_SHA = 'd1a1264b54bd4fe06d5f1288bda8d8ca1a3e7cdf52d9a6d50ddbb5b85c6143bb'
+# Both pinned builds have the same executable and payload bytes. Only NitroFS
+# directory table ordering differs between the legacy and current package.
+BOOTSTRAP_SHAS = {'d1a1264b54bd4fe06d5f1288bda8d8ca1a3e7cdf52d9a6d50ddbb5b85c6143bb',
+                  '8ddd4c2aa92c072926f27d373ac5a4ef716a7c52175ac51e45bb5fb904c5673a'}
 WORKFILES = {'ff62061c/054778e7.bin': 32 << 20,
              'ff62061c/757d8f91.bin': 10 << 20, '81788216.bin': 6 << 20}
 SCREENSHOT = 'ff62061c/26739303.bin'
@@ -94,7 +97,7 @@ class ZeroFile:
 
 def screenshot_archive(bootstrap):
     """Reproduce this pinned bootstrap's archive from its own NitroFS headers."""
-    if hashlib.sha256(bootstrap).hexdigest() != BOOTSTRAP_SHA:
+    if hashlib.sha256(bootstrap).hexdigest() not in BOOTSTRAP_SHAS:
         raise ValueError('Unsupported nds-bootstrap; review work-file layout before preparing it')
     fnt, fnt_size, fat, fat_size = struct.unpack_from('<4I', bootstrap, 0x40)
     names = bootstrap[fnt:fnt + fnt_size]
