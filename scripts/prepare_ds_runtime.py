@@ -166,7 +166,7 @@ def prepare_package(romfs, base):
 
 
 def prepare(sd_root, boot9):
-    from pyctr.crypto import CryptoEngine
+    from pyctr.crypto import CryptoEngine, Keyslot
     from pyctr.type.sd import SDFilesystem
     from pyctr.type.ncch import NCCHReader
     root = Path(sd_root).resolve(strict=True)
@@ -178,6 +178,11 @@ def prepare(sd_root, boot9):
     if len(sd.id1s) != 1:
         raise ValueError('Expected one ID1 directory for the supplied movable')
     tree = root / 'Nintendo 3DS' / crypto.id0.hex() / sd.current_id1
+    def open_content(relative):
+        # pyctr's SDFilesystem.open leaves the underlying handle open. Own it
+        # here so preparation releases Windows file locks before returning.
+        return crypto.create_ctr_io(Keyslot.SD, (tree / relative).open('rb'),
+                                    crypto.sd_path_to_iv('/' + relative), closefd=True)
     report = []
     for title in sorted((tree / 'title' / '00040000').iterdir()):
         if not title.is_dir():
@@ -185,7 +190,7 @@ def prepare(sd_root, boot9):
         found = []
         for content in sorted((title / 'content').glob('*.app')):
             relative = content.relative_to(tree).as_posix()
-            with sd.open(relative) as source:
+            with open_content(relative) as source:
                 header = source.read(0x200)
             if header[0x100:0x104] == b'NCCH' and header[0x150:0x160].rstrip(b'\0') == b'CTR-H-DCSD':
                 found.append(relative)
@@ -193,7 +198,7 @@ def prepare(sd_root, boot9):
             raise ValueError(f'Multiple DS packages in title {title.name}')
         if not found:
             continue
-        with sd.open(found[0]) as source, NCCHReader(source, crypto=crypto) as ncch:
+        with open_content(found[0]) as source, NCCHReader(source, crypto=crypto) as ncch:
             if ncch.program_id.lower() != '00040000' + title.name.lower():
                 raise ValueError('Installed DS title ID mismatch')
             created = prepare_package(ncch.romfs, title / 'data' / '00000000')
