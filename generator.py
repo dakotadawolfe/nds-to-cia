@@ -213,7 +213,7 @@ def build_game(rom, output, title=None, package=ROOT, native_assets=None, basic_
         run([makerom, '-f', 'cia', '-target', 't', '-exefslogo', '-logo', package/'data/blank-logo.lz',
              '-rsf', package/'data/build-cia.rsf',
              '-elf', package/'data/launcher.elf', '-banner', 'banner.bin', '-icon', 'icon.smdh',
-             '-DAPP_ROMFS=romfs', '-major', '1', '-minor', '0', '-micro', '0', '-DAPP_VERSION_MAJOR=1',
+             '-DAPP_ROMFS=romfs', '-major', '1', '-minor', '1', '-micro', '0', '-DAPP_VERSION_MAJOR=1',
              '-DAPP_PRODUCT_CODE=CTR-H-DCSD', '-DAPP_TITLE=DSCleanSD', f'-DAPP_UNIQUE_ID=0x{unique:X}', '-o', 'game.cia'])
         from verify import verify_cia
         verify_cia(work/'game.cia', 0x0004000000000000 | (unique << 8),

@@ -23,7 +23,8 @@ def build():
     # Explicit inventory: never collect a user's registry, game, font or key.
     allowed=['data/launcher.elf','data/build-cia.rsf','data/dsboot.wav','data/blank-logo.lz',
              'assets/blank-logo-auth.json','runtime/sdcard.nds','runtime/nds-bootstrap-release.nds',
-             'runtime/nds-bootstrap-hb-release.nds','tools/makerom.exe','tools/bannertool.exe']
+             'runtime/nds-bootstrap-hb-release.nds','tools/makerom.exe','tools/bannertool.exe',
+             'DS-Storage-Test.cia']
     for name in allowed:
         target=bundle/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(package/name,target)
     shutil.copytree(package/'licenses',bundle/'licenses',dirs_exist_ok=True)
@@ -57,7 +58,7 @@ def build():
     shutil.copytree(bundle/'licenses',release/'licenses',dirs_exist_ok=True)
     shutil.copy2(ROOT/'docs/THIRD_PARTY.md',release/'THIRD_PARTY.md')
     shutil.copytree(ROOT/'docs',release/'docs',dirs_exist_ok=True)
-    (release/'build-info.json').write_text(json.dumps({'version':'1.0.0','source_commit':manifest['source_commit'],
+    (release/'build-info.json').write_text(json.dumps({'version':'1.1.0','source_commit':manifest['source_commit'],
         'runtime_sources':manifest['sources'],'python':sys.version.split()[0],
         'python_packages':{name:importlib.metadata.version(name) for name in ('pyinstaller','pyctr','pycryptodomex')}},indent=2)+'\n')
 

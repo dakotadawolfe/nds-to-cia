@@ -89,6 +89,7 @@ def patch_sources():
     yanbf = BUILD / "yanbf"
     shutil.copy2(ROOT / "launcher.c", yanbf / "forwarder/source/main.c")
     shutil.copy2(ROOT / "workfiles.h", yanbf / "forwarder/source/workfiles.h")
+    shutil.copy2(ROOT / "file_status.h", yanbf / "forwarder/source/file_status.h")
     shutil.copy2(ROOT / "bridge.cpp", yanbf / "bootstrap/arm9/source/main.cpp")
     for folder in (yanbf/'forwarder/source', yanbf/'bootstrap/arm9/source'):
         for name in ('layout.h', 'requests.h', 'silent.h'):

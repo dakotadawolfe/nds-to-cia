@@ -54,6 +54,8 @@ jobs:
           name: runtime-build
           path: dist-v2
       - run: python -m pip install -r requirements-build.txt
+      - name: Test preparation and upgrade tools
+        run: python -m unittest discover -s tests -v
       - run: python scripts/build_windows.py
       - uses: actions/download-artifact@v4
         with:
@@ -67,6 +69,9 @@ jobs:
           $process = Start-Process -FilePath ./release/NDS-to-CIA.exe -ArgumentList 'dist-v2/Storage-Probe.nds --output build/Probe.cia --basic-banner --state-dir build/test-profile --report build/conversion-test.json' -WindowStyle Hidden -Wait -PassThru
           if ($process.ExitCode -ne 0) { Get-Content build/conversion-test.json; throw 'EXE conversion failed' }
           python -c "from pathlib import Path; from verify import verify_cia; verify_cia(Path('build/Probe.cia'))"
+          $process = Start-Process -FilePath ./release/NDS-to-CIA.exe -ArgumentList '--prepare-sd build/missing-card --report build/preparation-test.json' -WindowStyle Hidden -Wait -PassThru
+          if ($process.ExitCode -ne 1) { throw 'Invalid SD preparation input was accepted' }
+          python -c "import json; r=json.load(open('build/preparation-test.json')); assert not r['success'] and '--boot9' in r['error']"
       - run: python scripts/package_release.py
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:

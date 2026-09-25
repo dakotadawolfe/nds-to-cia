@@ -11,8 +11,10 @@ import threading
 
 from generator import build_game
 from prepare_native_banner import prepare
+from scripts.prepare_ds_runtime import prepare as prepare_sd_runtime
+from scripts.upgrade_ds_launcher import upgrade as upgrade_sd_launchers
 
-VERSION = '1.0.0'
+VERSION = '1.1.0'
 
 
 def package_root():
@@ -56,6 +58,19 @@ def convert(rom, output, state, basic=False, title=None):
     with state_lock(state):
         build_game(Path(rom), Path(output), title, package_root(), state/'native-assets',
                    basic, state/'title-ids.json')
+
+
+def prepare_card(args):
+    if not args.boot9 or not args.report:
+        raise ValueError('--prepare-sd requires --boot9 and --report')
+    if args.upgrade_launchers and not args.backup_dir:
+        raise ValueError('--upgrade-launchers requires a fresh --backup-dir')
+    result = {}
+    if args.upgrade_launchers:
+        result['launcher_upgrade'] = upgrade_sd_launchers(
+            args.prepare_sd, args.boot9, package_root()/'DS-Storage-Test.cia', args.backup_dir)
+    result['preparation'] = prepare_sd_runtime(args.prepare_sd, args.boot9)
+    return result
 
 
 class App:
@@ -174,8 +189,16 @@ def main(argv=None):
     parser.add_argument('--state-dir',type=Path,default=state_root())
     parser.add_argument('--report',type=Path)
     parser.add_argument('--self-test',action='store_true')
+    parser.add_argument('--prepare-sd',type=Path,help='Prepare installed DS game files in an existing SD/master folder')
+    parser.add_argument('--boot9',type=Path,help='Owner-provided boot9 dump for SD preparation')
+    parser.add_argument('--upgrade-launchers',action='store_true',help='Also upgrade existing installed launchers')
+    parser.add_argument('--backup-dir',type=Path,help='Fresh directory for encrypted originals before an upgrade')
     args=parser.parse_args(argv)
-    if args.self_test or args.output:
+    if sum(bool(value) for value in (args.self_test,args.output,args.prepare_sd)) > 1:
+        parser.error('Select only one operation: conversion, self-test or SD preparation')
+    if (args.upgrade_launchers or args.backup_dir or args.boot9) and not args.prepare_sd:
+        parser.error('SD preparation options require --prepare-sd')
+    if args.self_test or args.output or args.prepare_sd:
         report={'version':VERSION,'success':False}
         try:
             if args.self_test:
@@ -184,9 +207,11 @@ def main(argv=None):
                 import pyctr
                 root=tk.Tk();root.withdraw();app=App(root,args.state_dir);root.update();root.destroy()
                 AES.new(bytes(16),AES.MODE_ECB).encrypt(bytes(16))
-                required=['tools/makerom.exe','tools/bannertool.exe','data/launcher.elf','data/blank-logo.lz','assets/blank-logo-auth.json']
+                required=['tools/makerom.exe','tools/bannertool.exe','data/launcher.elf','data/blank-logo.lz','assets/blank-logo-auth.json','DS-Storage-Test.cia']
                 if not all((package_root()/f).is_file() for f in required):raise ValueError('Packaged build components are missing')
                 report['checks']=['tkinter-window','crypto-module','pyctr-import','embedded-build-tools']
+            elif args.prepare_sd:
+                report.update(prepare_card(args))
             else:
                 if not args.rom:raise ValueError('A DS dump is required')
                 convert(args.rom,args.output,args.state_dir,args.basic_banner)

@@ -12,6 +12,7 @@
 #include "requests.h"
 #include "silent.h"
 #include "workfiles.h"
+#include "file_status.h"
 
 static char base[256];
 #define BRIDGE_ID DS_BRIDGE_ID
@@ -69,16 +70,7 @@ static bool parents(const char *path) {
     return true;
 }
 static bool matches(const char *path, const Entry *entry) {
-    struct stat st;
-    if (stat(path, &st) || (uint64_t)st.st_size != entry->size) return false;
-    FILE *file = fopen(path, "rb");
-    if (!file) return false;
-    uint32_t crc = ~0u;
-    size_t n;
-    while ((n = fread(buffer, 1, sizeof(buffer), file))) crc = crc_step(crc, buffer, n);
-    bool okay = !ferror(file) && (crc ^ ~0u) == entry->crc;
-    if (fclose(file)) okay = false;
-    return okay;
+    return ds_has_expected_size(path, entry->size);
 }
 static bool extract_entry(unsigned index, const Entry *entry) {
     char source[64], target[512], temporary[528];
@@ -88,7 +80,10 @@ static bool extract_entry(unsigned index, const Entry *entry) {
     if (entry->flags & 1) {
         struct stat st;
         if (!stat(target, &st)) return true; /* Mutable settings are never replaced. */
-    } else if (matches(target, entry)) return true;
+    } else if (matches(target, entry)) {
+        if (logfile) { fprintf(logfile, "%s: prepared file, size matched\n", entry->name); fflush(logfile); }
+        return true;
+    }
     if (!parents(target)) return false;
     FILE *input = fopen(source, "rb");
     if (!input) return false;
@@ -109,7 +104,7 @@ static bool extract_entry(unsigned index, const Entry *entry) {
     if (fclose(output)) okay = false;
     if (okay) okay = matches(temporary, entry);
     if (okay) {
-        /* Replacement starts only after the staged file has passed readback. */
+        /* The copy's length and streaming CRC passed before publication. */
         if (remove(target) && errno != ENOENT) okay = false;
         if (okay && rename(temporary, target)) okay = false;
     }
@@ -198,7 +193,7 @@ int main(void) {
     snprintf(logpath, sizeof(logpath), "%s/" DS_LOG_FILE, base);
     if (!parents(logpath)) { gfxExit(); return 1; }
     logfile = fopen(logpath, "w");
-    if (logfile) { fprintf(logfile, "Launcher 1.0.0 entered: %016llX\n", title); fflush(logfile); }
+    if (logfile) { fprintf(logfile, "Launcher 1.1.0 entered: %016llX\n", title); fflush(logfile); }
     Result rc = romfsInit();
     if (logfile) { fprintf(logfile, "romfsInit: %08lX\n", rc); fflush(logfile); }
     if (R_FAILED(rc)) goto done;
@@ -230,7 +225,7 @@ int main(void) {
         okay = okay && game_found && runtime_found;
     }
     if (!okay) { ds_silent_printf("Invalid game package. Nothing installed.\n"); goto done; }
-    ds_silent_printf("NDS to CIA 1.0\n\nChecking game and runtime files...\n");
+    ds_silent_printf("NDS to CIA 1.1\n\nChecking game and runtime files...\n");
     for (unsigned i = 0; i < package.count; i++) {
         if (!extract_entry(i, &entries[i])) { ds_silent_printf("Installation failed: %s\nCheck SD free space and install.log.\n", entries[i].name); goto done; }
     }

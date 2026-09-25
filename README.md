@@ -4,7 +4,7 @@ Turn your Nintendo DS game dump into a self-contained Nintendo 3DS HOME Menu
 title. Each CIA includes the game and its launch files. After installation,
 there is no loose `.nds` file or shared `_nds` folder to maintain on the SD card.
 
-**[Download version 1.0](https://github.com/dakotadawolfe/nds-to-cia/releases/tag/v1.0.0)** ·
+**[Download version 1.1.0](https://github.com/dakotadawolfe/nds-to-cia/releases/tag/v1.1.0)** ·
 [Native banner setup](docs/NATIVE_BANNER.md) · [Build from source](docs/BUILDING.md)
 
 ## What you get
@@ -27,13 +27,13 @@ runtime and the limits below.
 - Your own complete `.nds` dump. See the
   [GodMode9 dumping guide](https://3ds.hacks.guide/dumping-titles-and-game-cartridges.html).
 - Free SD space for the installed CIA content **plus another copy of the game**,
-  per-game runtime files, at least 42 MiB of work files, and saves/caches.
+  per-game runtime files, about 53 MiB of work files, and saves/caches.
 
 ## Quick start
 
 ### 1. Install the bridge once
 
-1. Download and extract `NDS-to-CIA-1.0.0-Windows-x64.zip` from the release page.
+1. Download and extract `NDS-to-CIA-1.1.0-Windows-x64.zip` from the release page.
 2. Copy `Bridge.cia` to the console's SD card.
 3. Open FBI, browse to that file, and select **Install CIA**.
 4. After successful installation, remove the installation file if desired.
@@ -65,7 +65,14 @@ files are not overwritten. A small JSON receipt is saved beside each CIA.
 4. After installation, the input `.nds` and installation `.cia` do not need to
    remain on the console's SD card. Keep your originals backed up on your PC.
 
-Later launches reuse the extracted files, but still verify their contents.
+Version 1.1.0 reuses extracted files based on their expected sizes, without
+reading and checksumming the entire game on every launch. Missing or wrong-sized
+files are extracted again. Same-sized changes are trusted.
+
+For the shortest first launch, optionally [prepare the installed SD/master folder
+on your PC](docs/PREPARED_SD.md). This also preallocates the large work files.
+Existing games keep their old launchers until rebuilt or upgraded; updating the
+Windows converter alone does not change installed games.
 Reinstalling a CIA can trigger setup again. **Back up saves before updating,
 reinstalling or uninstalling a generated title.**
 
@@ -108,7 +115,7 @@ See [Native banner setup](docs/NATIVE_BANNER.md) for the dump/import process.
 | --- | --- |
 | No icon after installing `Bridge.cia` | Expected: only game CIAs create HOME Menu icons. |
 | Game returns to HOME Menu or stays black | Confirm the bridge is installed, DS mode works, the dump is complete, and the SD card has enough free space. |
-| First launch is slow | Extraction, verification and work-file creation happen silently. Allow setup to finish. |
+| First launch is slow | Extraction and work-file creation happen silently. Use optional PC preparation to move this work off the console. Normal DS initialization still runs. |
 | Native banner setup fails | Use the HOME Menu CIA and standard font CIA from your own console. Encrypted dumps also require your boot9 dump; fully decrypted CIAs do not. |
 | Existing output error | Choose a new CIA filename. The tool does not replace existing output files. |
 | Save disappeared after reinstall | Restore the backed-up managed save. Installer behavior can recreate the title's data folder. |
@@ -129,7 +136,7 @@ Windows may display an unknown-publisher prompt.
 - On-console testing confirmed the native banner, game startup, saving,
   reopening and sleep with Super Mario 64 DS. This is not a compatibility claim
   for every game or every console model.
-- The 1.0 desktop build is tested for GUI startup and end-to-end CIA creation;
+- The 1.1 desktop build is tested for GUI startup and end-to-end CIA creation;
   each newly generated game's compatibility still requires console testing.
 
 ## Source and credits

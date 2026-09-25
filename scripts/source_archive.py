@@ -6,7 +6,7 @@ import zipfile
 ROOT=Path(__file__).resolve().parents[1]
 out=ROOT/'release';out.mkdir(exist_ok=True)
 files=subprocess.check_output(['git','ls-files','-z'],cwd=ROOT).decode().split('\0')
-with zipfile.ZipFile(out/'NDS-to-CIA-1.0.0-Source.zip','w',zipfile.ZIP_DEFLATED) as archive:
+with zipfile.ZipFile(out/'NDS-to-CIA-1.1.0-Source.zip','w',zipfile.ZIP_DEFLATED) as archive:
     for name in files:
         if name:archive.write(ROOT/name,'nds-to-cia/'+name)
     for source in sorted((ROOT/'.build-v2/archives').glob('*.zip')):

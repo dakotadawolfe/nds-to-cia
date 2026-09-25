@@ -1,4 +1,4 @@
-# Building version 1.0
+# Building version 1.1.0
 
 The GitHub Actions workflow builds the ARM runtime on Linux, then the Windows
 executable on a clean Windows runner. No game dump, system dump, key, private
@@ -35,7 +35,7 @@ user games and diagnostic logs. The EXE embeds its Python interpreter, Tk GUI,
 crypto/import libraries, CIA-building tools and DS runtime. It does not need
 Python installed on the user's PC.
 
-Run the two packaged-executable tests from the workflow before running
+Run the packaged-executable tests from the workflow before running
 `python scripts/package_release.py`. The release ZIP contains the EXE, bridge,
 instructions, build metadata and license notices. The EXE and bridge are also
 published separately for convenience.
@@ -52,6 +52,12 @@ NDS-to-CIA.exe homebrew.nds --output homebrew.cia --basic-banner --report result
 It uses the same local profile as the GUI. `--state-dir DIRECTORY` selects an
 isolated profile for testing. Callers should wait for process exit; a report's
 `success` field and the exit code distinguish success from failure.
+
+## Preparing installed games
+
+The EXE also includes the PC preparation and installed-launcher upgrade tools.
+See [Prepared SD folders](PREPARED_SD.md) for commands and required owner inputs.
+These operations do not need a Python installation when using the EXE.
 
 ## Source archive and licenses
 
